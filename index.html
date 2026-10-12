@@ -1,0 +1,720 @@
+<title>מעבדת הסימולציות של פהד גאנם</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700;800;900&display=swap">
+<style>
+/* Layout: RTL educational portal — hero gradient, card grid, section rhythm */
+:root {
+  --bg: #F4F7FD;
+  --bg-hero-start: #E8EEFF;
+  --bg-hero-mid: #F0E8FF;
+  --bg-hero-end: #FFE8F0;
+  --fg: #0F172A;
+  --fg-secondary: #475569;
+  --primary: #2563EB;
+  --primary-hover: #1D4ED8;
+  --primary-light: #DBEAFE;
+  --primary-ghost: rgba(37,99,235,0.08);
+  --secondary: #7C3AED;
+  --secondary-light: #EDE9FE;
+  --accent: #F59E0B;
+  --accent-light: #FEF3C7;
+  --physics-accent: #8B5CF6;
+  --physics-light: #F3EEFF;
+  --elec-accent: #0EA5E9;
+  --elec-light: #E8F7FF;
+  --energy-accent: #F97316;
+  --energy-light: #FFF3E8;
+  --card: #FFFFFF;
+  --card-fg: #0F172A;
+  --muted: #94A3B8;
+  --border: #E2E8F0;
+  --shadow-sm: 0 1px 3px rgba(15,23,42,0.04), 0 1px 2px rgba(15,23,42,0.02);
+  --shadow-md: 0 4px 12px rgba(15,23,42,0.06), 0 2px 4px rgba(15,23,42,0.03);
+  --shadow-lg: 0 12px 32px rgba(15,23,42,0.08), 0 4px 8px rgba(15,23,42,0.04);
+  --radius: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  --font: 'Rubik', -apple-system, 'Segoe UI', sans-serif;
+  --transition: 200ms ease;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #0B1121;
+    --bg-hero-start: #0F1A35;
+    --bg-hero-mid: #160F2E;
+    --bg-hero-end: #1F0F1A;
+    --fg: #F1F5F9;
+    --fg-secondary: #94A3B8;
+    --primary: #60A5FA;
+    --primary-hover: #93C5FD;
+    --primary-light: #1E3A5F;
+    --primary-ghost: rgba(96,165,250,0.1);
+    --secondary: #A78BFA;
+    --secondary-light: #2E1F5E;
+    --accent: #FBBF24;
+    --accent-light: #422D08;
+    --physics-accent: #A78BFA;
+    --physics-light: #1E1545;
+    --elec-accent: #38BDF8;
+    --elec-light: #0C2D44;
+    --energy-accent: #FB923C;
+    --energy-light: #3B1F08;
+    --card: #162032;
+    --card-fg: #F1F5F9;
+    --muted: #64748B;
+    --border: #1E2D45;
+    --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+    --shadow-lg: 0 12px 32px rgba(0,0,0,0.35);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #0B1121;
+  --bg-hero-start: #0F1A35;
+  --bg-hero-mid: #160F2E;
+  --bg-hero-end: #1F0F1A;
+  --fg: #F1F5F9;
+  --fg-secondary: #94A3B8;
+  --primary: #60A5FA;
+  --primary-hover: #93C5FD;
+  --primary-light: #1E3A5F;
+  --primary-ghost: rgba(96,165,250,0.1);
+  --secondary: #A78BFA;
+  --secondary-light: #2E1F5E;
+  --accent: #FBBF24;
+  --accent-light: #422D08;
+  --physics-accent: #A78BFA;
+  --physics-light: #1E1545;
+  --elec-accent: #38BDF8;
+  --elec-light: #0C2D44;
+  --energy-accent: #FB923C;
+  --energy-light: #3B1F08;
+  --card: #162032;
+  --card-fg: #F1F5F9;
+  --muted: #64748B;
+  --border: #1E2D45;
+  --shadow-sm: 0 1px 3px rgba(0,0,0,0.2);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.25);
+  --shadow-lg: 0 12px 32px rgba(0,0,0,0.35);
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font);
+  direction: rtl;
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+a { color: var(--primary); text-decoration: none; transition: color var(--transition); }
+a:hover { color: var(--primary-hover); }
+
+/* ===== NAV ===== */
+.nav {
+  position: sticky;
+  top: env(safe-area-inset-top, 0px);
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg) 85%, transparent);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px;
+}
+.nav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 56px;
+  gap: 16px;
+}
+.nav-brand {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--fg);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nav-brand svg { flex-shrink: 0; }
+.nav-links { display: flex; gap: 6px; align-items: center; }
+.nav-link {
+  padding: 6px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--fg-secondary);
+  transition: all var(--transition);
+  cursor: pointer;
+  border: none;
+  background: none;
+  font-family: inherit;
+}
+.nav-link:hover { background: var(--primary-ghost); color: var(--primary); }
+.nav-link.active { background: var(--primary); color: #fff; }
+
+/* ===== HERO ===== */
+.hero {
+  background: linear-gradient(135deg, var(--bg-hero-start) 0%, var(--bg-hero-mid) 50%, var(--bg-hero-end) 100%);
+  padding: 64px 24px 56px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  width: 500px; height: 500px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--primary-ghost) 0%, transparent 70%);
+  top: -150px; left: 50%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+.hero-icon {
+  width: 96px; height: 96px;
+  background: var(--card);
+  border-radius: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow-lg);
+  margin-bottom: 28px;
+  position: relative;
+}
+.hero h1 {
+  font-size: clamp(1.75rem, 5vw, 2.6rem);
+  font-weight: 800;
+  line-height: 1.25;
+  margin: 0 0 16px;
+  text-wrap: balance;
+  letter-spacing: -0.02em;
+}
+.hero-sub {
+  font-size: 1.05rem;
+  color: var(--fg-secondary);
+  max-width: 560px;
+  margin: 0 auto 36px;
+  line-height: 1.75;
+}
+.stats-row {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  flex-wrap: wrap;
+}
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.stat-value {
+  font-size: 1.7rem;
+  font-weight: 800;
+  color: var(--primary);
+  font-variant-numeric: tabular-nums;
+}
+.stat-label {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 500;
+}
+
+/* ===== ABOUT ===== */
+.section {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding-block: 56px;
+  padding-inline: 24px;
+}
+.section-title {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 0 0 32px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.about-card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: 32px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border);
+  display: flex;
+  gap: 28px;
+  align-items: center;
+}
+.about-avatar {
+  width: 88px; height: 88px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary-light), var(--secondary-light));
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+.about-avatar svg { width: 44px; height: 44px; color: var(--primary); }
+.about-info { flex: 1; min-width: 0; }
+.about-name { font-size: 1.25rem; font-weight: 700; margin: 0 0 4px; }
+.about-role { font-size: 0.9rem; color: var(--fg-secondary); margin: 0 0 12px; }
+.badges { display: flex; gap: 8px; flex-wrap: wrap; }
+.badge {
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--fg-secondary);
+}
+
+/* ===== PROGRAMS ===== */
+.programs-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+.program-card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  padding: 28px 24px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  transition: all var(--transition);
+  cursor: pointer;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.program-card::before {
+  content: '';
+  position: absolute;
+  top: 0; right: 0; left: 0;
+  height: 4px;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  transition: height var(--transition);
+}
+.program-card:hover {
+  box-shadow: var(--shadow-lg);
+  transform: translateY(-3px);
+}
+.program-card:hover::before { height: 5px; }
+.program-card.elec::before { background: var(--elec-accent); }
+.program-card.electronics::before { background: var(--secondary); }
+.program-card.physics::before { background: var(--physics-accent); }
+
+.program-icon {
+  width: 56px; height: 56px;
+  border-radius: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+}
+.program-card.elec .program-icon { background: var(--elec-light); color: var(--elec-accent); }
+.program-card.electronics .program-icon { background: var(--secondary-light); color: var(--secondary); }
+.program-card.physics .program-icon { background: var(--physics-light); color: var(--physics-accent); }
+
+.program-name { font-size: 1.05rem; font-weight: 700; margin: 0 0 8px; }
+.program-desc { font-size: 0.85rem; color: var(--fg-secondary); margin: 0 0 16px; line-height: 1.65; }
+.program-meta {
+  font-size: 0.78rem;
+  color: var(--muted);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+.program-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary);
+  margin-top: 12px;
+  transition: gap var(--transition);
+}
+.program-card:hover .program-link { gap: 8px; }
+
+/* ===== FEATURES ===== */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+.feature {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: 24px 20px;
+  border: 1px solid var(--border);
+  text-align: center;
+  transition: all var(--transition);
+}
+.feature:hover { box-shadow: var(--shadow-md); }
+.feature-icon {
+  width: 44px; height: 44px;
+  border-radius: 12px;
+  background: var(--primary-ghost);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+.feature-title { font-size: 0.9rem; font-weight: 600; margin: 0 0 4px; }
+.feature-desc { font-size: 0.8rem; color: var(--fg-secondary); margin: 0; line-height: 1.6; }
+
+/* ===== TOPICS ===== */
+.topics-tabs {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 7px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.82rem;
+  font-weight: 500;
+  background: var(--card);
+  color: var(--fg-secondary);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all var(--transition);
+  font-family: inherit;
+}
+.tab:hover { border-color: var(--primary); color: var(--primary); }
+.tab.active { background: var(--primary); color: #fff; border-color: var(--primary); }
+
+.topic-list { display: flex; flex-direction: column; gap: 8px; }
+.topic-item {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  transition: all var(--transition);
+  cursor: pointer;
+}
+.topic-item:hover { box-shadow: var(--shadow-sm); border-color: var(--primary); }
+.topic-name { font-weight: 600; font-size: 0.92rem; }
+.topic-count {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--primary);
+  background: var(--primary-ghost);
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  font-variant-numeric: tabular-nums;
+  flex-shrink: 0;
+}
+
+/* ===== CTA ===== */
+.cta-section {
+  background: linear-gradient(135deg, var(--bg-hero-start), var(--bg-hero-mid));
+  border-radius: var(--radius-lg);
+  padding: 48px 32px;
+  text-align: center;
+  border: 1px solid var(--border);
+}
+.cta-title { font-size: 1.4rem; font-weight: 700; margin: 0 0 12px; }
+.cta-desc { font-size: 0.95rem; color: var(--fg-secondary); margin: 0 0 24px; }
+.cta-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-radius: var(--radius-full);
+  background: var(--primary);
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.95rem;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  transition: all var(--transition);
+  box-shadow: 0 4px 14px rgba(37,99,235,0.3);
+}
+.cta-btn:hover { background: var(--primary-hover); transform: translateY(-1px); box-shadow: 0 6px 20px rgba(37,99,235,0.35); }
+
+/* ===== FOOTER ===== */
+.footer {
+  text-align: center;
+  padding: 32px 24px;
+  font-size: 0.8rem;
+  color: var(--muted);
+  border-top: 1px solid var(--border);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .programs-grid { grid-template-columns: 1fr; }
+  .features-grid { grid-template-columns: repeat(2, 1fr); }
+  .about-card { flex-direction: column; text-align: center; }
+  .hero { padding: 48px 20px 40px; }
+  .stats-row { gap: 24px; }
+  .nav-links { gap: 2px; }
+  .nav-link { padding: 6px 10px; font-size: 0.8rem; }
+}
+@media (max-width: 480px) {
+  .features-grid { grid-template-columns: 1fr; }
+  .stats-row { gap: 20px; }
+  .stat-value { font-size: 1.4rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+</style>
+
+<!-- NAV -->
+<nav class="nav">
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4m0 12v4M4.93 4.93l2.83 2.83m8.48 8.48 2.83 2.83M2 12h4m12 0h4M4.93 19.07l2.83-2.83m8.48-8.48 2.83-2.83"/><circle cx="12" cy="12" r="4"/></svg>
+      fahed-lab.com
+    </div>
+    <div class="nav-links">
+      <button class="nav-link active">דף הבית</button>
+      <button class="nav-link" onclick="document.getElementById('programs').scrollIntoView({behavior:'smooth'})">מגמות</button>
+      <button class="nav-link" onclick="document.getElementById('topics').scrollIntoView({behavior:'smooth'})">שערי לימוד</button>
+      <button class="nav-link" onclick="document.getElementById('about').scrollIntoView({behavior:'smooth'})">אודות</button>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-icon">
+    <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="12" cy="12" r="10"/>
+      <path d="M12 6v6l4 2"/>
+      <path d="M16 8a5 5 0 0 0-8 0" opacity="0.5"/>
+      <path d="M8 16a5 5 0 0 0 8 0" opacity="0.5"/>
+    </svg>
+  </div>
+  <h1>מעבדת הסימולציות של פהד גאנם</h1>
+  <p class="hero-sub">בנו, מדדו וחקרו שיעורים בדפדפן — חשמל, אלקטרוניקה ופיזיקה. שעורים, סימולטורים אינטראקטיביים ומעבדות וירטואליות, כ-22 נושאים, בחמישה שערי לימוד ובשלושת המגמות למקצוע חשמל ואלקטרוניקה.</p>
+  <div class="stats-row">
+    <div class="stat">
+      <span class="stat-value">+50</span>
+      <span class="stat-label">סימולטורים</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">22</span>
+      <span class="stat-label">נושאים</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">3</span>
+      <span class="stat-label">מגמות</span>
+    </div>
+    <div class="stat">
+      <span class="stat-value">AI</span>
+      <span class="stat-label">בינה מלאכותית</span>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section" id="about">
+  <div class="about-card">
+    <div class="about-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 0 0-16 0"/></svg>
+    </div>
+    <div class="about-info">
+      <h2 class="about-name">פהד גאנם</h2>
+      <p class="about-role">מורה להנדסת חשמל ואלקטרוניקה · בית ספר תיכון ימה</p>
+      <div class="badges">
+        <span class="badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/></svg>
+          תואר ראשון בהנדסת חשמל ואלקטרוניקה
+        </span>
+        <span class="badge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c0 1.1 2.7 3 6 3s6-1.9 6-3v-5"/></svg>
+          תואר שני בניהול ומדיניות אנרגיה
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROGRAMS -->
+<section class="section" id="programs">
+  <h2 class="section-title">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8m-4-4v4"/></svg>
+    תכנית הלימודים לפי מגמה
+  </h2>
+  <div class="programs-grid">
+
+    <div class="program-card elec">
+      <div class="program-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+      </div>
+      <h3 class="program-name">הנדסת חשמל, בקרה ואנרגיה</h3>
+      <p class="program-desc">מנועים, שנאים, מערכות בקרה וחלוקת אנרגיה — עם סימולטורים חיים למעגלי כוח ומכונות חשמליות.</p>
+      <div class="program-meta">שאלון 848589</div>
+      <span class="program-link">
+        כניסה
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+      </span>
+    </div>
+
+    <div class="program-card electronics">
+      <div class="program-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><rect x="9" y="9" width="6" height="6"/><path d="M15 2v2m-6-2v2m6 16v2m-6-2v2m8-10h2M2 15h2M2 9h2m16 0h2"/></svg>
+      </div>
+      <h3 class="program-name">אלקטרוניקה ומחשבים</h3>
+      <p class="program-desc">מעגלים אנלוגיים ודיגיטליים, מיקרו-בקרים, מערכות משובצות ותכנות — בסביבה אינטראקטיבית מלאה.</p>
+      <div class="program-meta">שאלון 815381</div>
+      <span class="program-link">
+        כניסה
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+      </span>
+    </div>
+
+    <div class="program-card physics">
+      <div class="program-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.04.02-7.36-4.5-11.9-4.54-4.52-9.86-6.54-11.9-4.5-2.04 2.04-.02 7.36 4.5 11.9 4.54 4.52 9.86 6.54 11.9 4.5z"/><path d="M15.7 15.7c4.52-4.54 6.54-9.86 4.5-11.9-2.04-2.04-7.36-.02-11.9 4.5-4.52 4.54-6.54 9.86-4.5 11.9 2.04 2.04 7.36.02 11.9-4.5z"/></svg>
+      </div>
+      <h3 class="program-name">פורטל הפיזיקה</h3>
+      <p class="program-desc">ממכניקה ועד קרינה וחומר — סימולטורים שבהם משנים פרמטרים ורואים את הפיזיקה קורית בזמן אמת.</p>
+      <div class="program-meta">18 פרקים · 3 אשכולות</div>
+      <span class="program-link">
+        כניסה
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5m7-7-7 7 7 7"/></svg>
+      </span>
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section">
+  <h2 class="section-title">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26"/></svg>
+    מה תמצאו כאן
+  </h2>
+  <div class="features-grid">
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v16h16"/><path d="m5 19 6-6 2 2 6-8"/></svg>
+      </div>
+      <h3 class="feature-title">סימולטורים חיים</h3>
+      <p class="feature-desc">שנו פרמטרים בזמן אמת וצפו בתוצאות מיידיות</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8V4H8"/><rect x="8" y="8" width="8" height="8" rx="1"/><path d="M4 12h4m8 0h4m-8-8v4m0 8v4"/></svg>
+      </div>
+      <h3 class="feature-title">בונה מעגלים</h3>
+      <p class="feature-desc">גררו רכיבים, חוותו ובנו מעגלים בעצמכם</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      </div>
+      <h3 class="feature-title">פתרונות בגרות</h3>
+      <p class="feature-desc">פתרונות מפורטים לשאלוני הבגרות עם הסברים</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8a2 2 0 1 0 4 0 2 2 0 1 0-4 0"/><path d="M12 2v2m0 12v2"/><path d="M2 12h2m16 0h2"/><circle cx="12" cy="12" r="10" opacity="0.3"/><path d="m4.93 4.93 1.41 1.41m11.32 11.32 1.41 1.41m-14.14 0 1.41-1.41m11.32-11.32 1.41-1.41"/></svg>
+      </div>
+      <h3 class="feature-title">AI מובנה</h3>
+      <p class="feature-desc">בינה מלאכותית שעוזרת בהבנת המושגים ופתרון תרגילים</p>
+    </div>
+  </div>
+</section>
+
+<!-- TOPICS -->
+<section class="section" id="topics">
+  <h2 class="section-title">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--secondary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+    שערי הלימוד
+  </h2>
+  <div class="topics-tabs">
+    <button class="tab active" onclick="filterTopics('all', this)">הכל</button>
+    <button class="tab" onclick="filterTopics('10', this)">כיתה י׳</button>
+    <button class="tab" onclick="filterTopics('11', this)">כיתה י״א</button>
+    <button class="tab" onclick="filterTopics('12', this)">כיתה י״ב</button>
+    <button class="tab" onclick="filterTopics('bagrut', this)">בגרות ותרגול</button>
+  </div>
+  <div class="topic-list" id="topicList">
+    <div class="topic-item" data-grade="10">
+      <span class="topic-name">כיתה י׳ · 11.001 תורת החשמל</span>
+      <span class="topic-count">12 שיעורים</span>
+    </div>
+    <div class="topic-item" data-grade="10">
+      <span class="topic-name">כיתה י׳ · 11.002 מערכות ספרתיות</span>
+      <span class="topic-count">2 שיעורים</span>
+    </div>
+    <div class="topic-item" data-grade="10">
+      <span class="topic-name">כיתה י׳ · 11.003 מבוא למערכות משובצות מחשב</span>
+      <span class="topic-count">8 שיעורים</span>
+    </div>
+    <div class="topic-item" data-grade="10">
+      <span class="topic-name">כיתה י׳-י״א · 11.004 יסודות התכנות</span>
+      <span class="topic-count">2 שיעורים</span>
+    </div>
+    <div class="topic-item" data-grade="11">
+      <span class="topic-name">כיתה י״א · 11.001 אלקטרוניקה תקבילית וספרתית</span>
+      <span class="topic-count">10 שיעורים</span>
+    </div>
+    <div class="topic-item" data-grade="11">
+      <span class="topic-name">כיתה י״א-י״ב · 11.40 התמחות מערכות אלקטרוניות</span>
+      <span class="topic-count">9 שיעורים</span>
+    </div>
+    <div class="topic-item" data-grade="bagrut">
+      <span class="topic-name">בגרות ותרגול — 815381</span>
+      <span class="topic-count">3 פתרונות</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="section">
+  <div class="cta-section">
+    <h2 class="cta-title">מוכנים להתחיל ללמוד?</h2>
+    <p class="cta-desc">כל הסימולטורים, המעבדות הווירטואליות ופתרונות הבגרויות — בחינם ופתוח לכולם.</p>
+    <button class="cta-btn" onclick="document.getElementById('programs').scrollIntoView({behavior:'smooth'})">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21"/></svg>
+      התחילו עכשיו
+    </button>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p style="margin:0;">© 2025 מעבדת הסימולציות של פהד גאנם · כל הזכויות שמורות</p>
+</footer>
+
+<script>
+function filterTopics(grade, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.topic-item').forEach(item => {
+    if (grade === 'all' || item.dataset.grade === grade) {
+      item.hidden = false;
+    } else {
+      item.hidden = true;
+    }
+  });
+}
+</script>
